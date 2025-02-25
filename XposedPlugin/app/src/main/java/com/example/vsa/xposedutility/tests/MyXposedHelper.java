@@ -8,13 +8,14 @@ import com.example.vsa.xposedutility.Utilities;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.HashSet;
 
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedBridge;
 
 public class MyXposedHelper {
-
+    static String TAG = Wechat7020.class.getSimpleName();
     public static HashSet<String>  IGNORES = new HashSet<String>();
 
     static{
@@ -33,6 +34,7 @@ public class MyXposedHelper {
             Class clazz = classLoader.loadClass(classp);
             for(Method md : getAllMethods(clazz)) {
                 if (ignores == null || (ignores != null && !ignores.contains(md.getName()))) {
+                    Log.d(TAG, "---->>>hookMethod in helper line 38"+md+callback);
                     XposedBridge.hookMethod(md, callback);
                     hooked.add(md);
                 }
@@ -49,6 +51,7 @@ public class MyXposedHelper {
             Class clazz = classLoader.loadClass(classp);
             for(Method md : getAllMethods(clazz)) {
                 if (shoulds == null || (shoulds != null && shoulds.contains(md.getName()))) {
+                    Log.d(TAG, "---->>>hookMethod in helper line 55"+md+callback);
                     XposedBridge.hookMethod(md, callback);
                     hooked.add(md);
                 }
@@ -64,9 +67,13 @@ public class MyXposedHelper {
         try {
             Class clazz = classLoader.loadClass(classp);
             for(Member md : getDeclaredMethods(clazz)) {
-                if (shoulds == null || (shoulds != null && shoulds.contains(md.getName()))) {
-                    XposedBridge.hookMethod(md, callback);
-                    hooked.add(md);
+//                Log.d(TAG, Utilities.getpidname() + " hookAllDeclaredMethods:" + md);
+                if (!Modifier.isAbstract(md.getModifiers())) {
+                    if (shoulds == null || (shoulds != null && shoulds.contains(md.getName()))) {
+//                        Log.d(TAG, "---->>>hookMethod in helper line 74"+md+callback);
+                        XposedBridge.hookMethod(md, callback);
+                        hooked.add(md);
+                    }
                 }
             }
         } catch (ClassNotFoundException e) {
@@ -81,6 +88,7 @@ public class MyXposedHelper {
             Class clazz = classLoader.loadClass(classp);
             for (Member md : clazz.getDeclaredConstructors()) {
                 if (shoulds == null || (shoulds != null && shoulds.contains(md.getName()))) {
+                    Log.d(TAG, "---->>>hookMethod in helper line 92"+md+callback);
                     XposedBridge.hookMethod(md, callback);
                     hooked.add(md);
                 }
@@ -98,6 +106,7 @@ public class MyXposedHelper {
             for(Method md : getAllMethods(clazz)) {
 
                 if (md.getName().equals(mname) &&(argscount == -1 || md.getParameterTypes().length == argscount)) {
+                    Log.d(TAG, "---->>>hookMethod in helper line 110"+md+callback);
                     XposedBridge.hookMethod(md, callback);
                     hooked.add(md);
                 }

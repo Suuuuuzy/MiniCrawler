@@ -1,6 +1,13 @@
 package com.example.vsa.xposedutility;
 
 import android.util.Log;
+import android.content.ContentValues;
+import android.provider.MediaStore;
+import java.io.OutputStream;
+import android.net.Uri;
+import android.content.Context;
+import android.os.Environment;
+
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -40,6 +47,23 @@ public class Utilities {
     }
 
     public static void writeToFile(String fpath, String data) {
+//        OutputStream outputStream = null;
+//        // Scoped Storage handling for Android 10+
+//        ContentValues values = new ContentValues();
+//        values.put(MediaStore.MediaColumns.DISPLAY_NAME, fpath);
+//        values.put(MediaStore.MediaColumns.MIME_TYPE, "text/plain");
+//        values.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS);
+//
+//        Uri externalUri = MediaStore.Downloads.EXTERNAL_CONTENT_URI;
+//        Uri fileUri = context.getContentResolver().insert(externalUri, values);
+//        if (fileUri != null) {
+//            outputStream = context.getContentResolver().openOutputStream(fileUri);
+//            if (outputStream != null) {
+//                outputStream.write(data.getBytes());
+//                outputStream.flush();
+//                Log.d("FileWriterExample", "Data written to Download folder.");
+//            }
+//        }
         FileWriter writer = null;
         try {
             writer = new FileWriter(fpath, true);

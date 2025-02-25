@@ -20,7 +20,6 @@ public class WechatSearchToken implements ICases {
     @Override
     public void hook(final XC_LoadPackage.LoadPackageParam pparam) {
         if (!pparam.packageName.equals("com.tencent.mm")) return;
-
         hookAll(pparam, pparam.classLoader);
         final String packageName = pparam.packageName;
         Class[] loaderClassList = {
@@ -47,7 +46,8 @@ public class WechatSearchToken implements ICases {
 
             protected void beforeHookedMethod(final MethodHookParam param) throws Throwable {
                 Log.d(TAG, Utilities.getpidname() + "---->>>:" + param.method.getName());
-
+                // jianjia: I do not know whether https://mp.weixin.qq.com/wxa-cgi/innersearch/subsearch still works for the miniapp search
+                // ignore it for now
                 if (param.args.length > 1 && (param.args[1] + "").contains("https://mp.weixin.qq.com/wxa-cgi/innersearch/subsearch")) {
 
                     Log.d(TAG, "HTTP_GET_DATA:" + param.args[1].toString().split("from_h5")[0]);
@@ -61,7 +61,7 @@ public class WechatSearchToken implements ICases {
 
         for (String cls : clss) {
             for (Member md : MyXposedHelper.hookAllDeclaredMethods(classLoader, cls, null, cb)) {
-                Log.d(TAG, Utilities.getpidname() + "hooked:" + md);
+                Log.d(TAG, "hooked:" + md);
             }
         }
     }

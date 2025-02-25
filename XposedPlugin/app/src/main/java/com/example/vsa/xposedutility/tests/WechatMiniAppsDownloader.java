@@ -25,7 +25,7 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
 public class WechatMiniAppsDownloader implements ICases {
     static String TAG = WechatMiniAppsDownloader.class.getSimpleName();
 
-    public static HashSet<Object> wvs = new HashSet<Object>();
+//    public static HashSet<Object> wvs = new HashSet<Object>();
 
     @Override
     public void hook(final XC_LoadPackage.LoadPackageParam pparam) {
@@ -54,7 +54,7 @@ public class WechatMiniAppsDownloader implements ICases {
 
         XC_MethodHook cb  =new XC_MethodHook() {
             protected void afterHookedMethod(final MethodHookParam param) throws Throwable {
-                Log.d(TAG, "---->>>:" + param.method.getName()+":"+did+":"+param.thisObject.getClass().getName());
+                Log.d(TAG, "android.app.Activity onCreate callback---->>>" + param.method.getName()+":"+did+":"+param.thisObject.getClass().getName());
 
                 if (did) return;
                 did = true;
@@ -68,40 +68,56 @@ public class WechatMiniAppsDownloader implements ICases {
                 Log.d(TAG, "---->>>:registerReceiver" );
             }
         };
-
+//        Log.d(TAG, "---->>>findAndHookMethod in downloader onCreate: "+classLoader);
         XposedHelpers.findAndHookMethod("android.app.Activity", classLoader, "onCreate", Bundle.class, cb);
-        String wb = "com.tencent.mm.plugin.webview.ui.tools.WebviewMpUI";
-        wb = "com.tencent.mm.plugin.webview.ui.tools.WebViewUI";
-        wb = "android.app.Activity";
-        try{
-            classLoader.loadClass(wb);
-            XposedHelpers.findAndHookMethod(wb, classLoader, "onResume", new XC_MethodHook() {
-                protected void afterHookedMethod(final MethodHookParam param) throws Throwable {
-                    if(param.thisObject.getClass().getName().equals("com.tencent.mm.plugin.webview.ui.tools.WebviewMpUI")){
-                        Log.d(TAG, "---->>>:kill");
-                        Activity act = ((Activity)param.thisObject);
-                        act.finish();
-                    }
-                }
-            });
-            Log.d(TAG, "WebviewMpUI-onCreate");
-        }catch (Exception e){
+        // jianjia: do not kill?
+//        String wb = "com.tencent.mm.plugin.webview.ui.tools.WebviewMpUI";
+//        wb = "com.tencent.mm.plugin.webview.ui.tools.WebViewUI";
+//        wb = "android.app.Activity";
+//        try{
+//            classLoader.loadClass(wb);
+//            XposedHelpers.findAndHookMethod(wb, classLoader, "onResume", new XC_MethodHook() {
+//                protected void afterHookedMethod(final MethodHookParam param) throws Throwable {
+//                    String target = param.thisObject.getClass().getName();
+//                    Log.d(TAG, "android.app.Activity onResume callback---->>>" + param.method.getName()+":"+target);
+//                    if(target.equals("com.tencent.mm.plugin.webview.ui.tools.WebviewMpUI")
+//                            || target.equals("com.tencent.mm.plugin.brandservice.ui.timeline.preload.ui.TmplWebViewMMUI")
+//                            || target.equals("com.tencent.mm.plugin.appbrand.ui.AppBrandUI")
+//                            || target.equals("com.tencent.mm.plugin.webview.ui.tools.MMWebViewUI")  // this found in 8049
+//                            || target.equals("com.tencent.mm.plugin.webview.ui.tools.WebViewUI")
+//                            || target.equals("com.tencent.mm.plugin.brandservice.ui.timeline.preload.ui.TmplWebViewToolUI") // this found in 8049
+//                            || target.equals("com.tencent.mm.plugin.brandservice.ui.timeline.preload.ui.TmplWebViewTooLMpUI") // not found in 8049
+//                            || target.equals("com.tencent.mm.plugin.webview.ui.tools.CustomSchemeEntryWebViewUI")  // this found in 8049
+//                            || target.equals("com.tencent.mm.plugin.webview.ui.tools.fts.PreLoadWebViewUI")  // this found in 8049
+//                            || target.equals("com.tencent.mm.plugin.appbrand.launching.AppBrandLaunchProxyUI")  // this found in 8049, not sure
+//                    ){
+//                        Log.d(TAG, "---->>>:kill");
+//                        Activity act = ((Activity)param.thisObject);
+//                        act.finish();
+//                    }
+//                }
+//            });
+//            Log.d(TAG, "WebviewMpUI-onCreate");
+//        }catch (Exception e){
+//
+//        }
 
-        }
     }
 
     public class MyReceiver extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.d(TAG, "---->>>:onReceive:start:" + wvs.size());
+            Log.d(TAG, "---->>>:onReceive:start:" + Wechat7020.wvs.size());
             try {
                 String app = intent.getStringExtra("appid");
-                for (Object obj : wvs) {
+                int cnt = 0;
+                for (Object obj : Wechat7020.wvs) {
                     if (obj == null) continue;
                     try {
                         Method invokeHandler = obj.getClass().getMethod("invokeHandler", String.class, String.class, int.class);
                         String str = "{\"appId\":\"" + app + "\",\"extraData\":\"\",\"envVersion\":\"release\",\"scene\":1037,\"sceneNote\":\"\"}";
+                        Log.d(TAG, "invokeHandler---->"+str);
                         invokeHandler.invoke(obj, new Object[]{"navigateToMiniProgram", str, 9999});
                     } catch (IllegalAccessException e) {
                         e.printStackTrace();
@@ -111,6 +127,12 @@ public class WechatMiniAppsDownloader implements ICases {
                         e.printStackTrace();
                     }
                     Log.d(TAG, "---->>>:navigateToMiniProgram:" + app);
+                    cnt += 1;
+                    if (cnt>10){
+                        break;
+                    }                    // jianjia: if we succeed for one time, break. Don't need to go over all wvs
+                    // if break here, then we need to close the newly opened miniapp to navigate to the next one
+//                    break;
                 }
                 Log.d(TAG, "---->>>:onReceive:end");
             } catch (Exception e) {

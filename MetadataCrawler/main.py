@@ -2,6 +2,9 @@
 import db
 import MiniAppsSearch
 import wordsplits
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
 
 words = {}
