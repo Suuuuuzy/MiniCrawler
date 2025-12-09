@@ -1,3 +1,12 @@
+# Updates by Minnie by Jan. 2025
+
+1. `MetadataCrawler` no longer works. WeChat disabled the query API.
+
+2. `XposedPlugin` was for `WeChat 7.0.19`, which no longer allows login. We updated the Java hooks to `WeChat 8.0.49`, to intercept the miniapp searching process, to crawl metadata.
+
+
+# Original README
+
 ## How to run it
 MiniCrawler is a scalable and open source WeChat mini-app crawler, it contains two parts:
 
