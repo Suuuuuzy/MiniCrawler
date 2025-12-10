@@ -2,7 +2,7 @@
 
 1. `MetadataCrawler` no longer works. WeChat disabled the query API.
 
-2. `XposedPlugin` was for `WeChat 7.0.19`, which no longer allows login. We updated the Java hooks to `WeChat 8.0.49`, to intercept the miniapp searching process, to crawl metadata.
+2. `XposedPlugin` was for `WeChat 7.0.19`, which no longer allows login. Minnie hooks Java functions in `WeChat 8.0.49`, to 1. for meta data crawling, intercept the miniapp searching process, 2. for package downloading and further process, get package constitution information upon downloading.
 
 
 # Original README
